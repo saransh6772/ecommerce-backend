@@ -6,7 +6,6 @@ import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/features.js";
-//import {faker} from "@faker-js/faker"
 
 export const newProduct=TryCatch(async(req:Request<{},{},NewProductRequestBody>,res,next)=>{
     const {name,category,price,stock}=req.body;
@@ -40,7 +39,7 @@ export const getLatestProducts=TryCatch(async(req,res,next)=>{
         products=JSON.parse(myCache.get("latest-product") as string)
     }
     else{
-        products=await Product.find().sort({createdAt:-1}).limit(5);
+        products=await Product.find().sort({createdAt:-1}).limit(4);
         myCache.set("latest-product",JSON.stringify(products))
     }
     return res.status(201).json({
@@ -159,7 +158,7 @@ export const getAllProducts=TryCatch(async(req:Request<{},{},{},SearchRequestQue
         baseQuery.category=category;
     }
     const [products,filteredOnly]=await Promise.all([
-        Product.find(baseQuery).sort(sort?{price:sort==="asc"?1:-1}:undefined).limit(limit),
+        Product.find(baseQuery).sort(sort?{price:sort==="asc"?1:-1}:undefined).limit(limit).skip(skip),
         Product.find(baseQuery)
     ])
     const totalPage=Math.ceil(filteredOnly.length/limit);
@@ -169,38 +168,3 @@ export const getAllProducts=TryCatch(async(req:Request<{},{},{},SearchRequestQue
         totalPage
     })
 })
-
-// const generateRandomProducts = async (count: number = 10) => {
-//       const products = [];
-    
-//       for (let i = 0; i < count; i++) {
-//         const product = {
-//           name: faker.commerce.productName(),
-//           photo: "uploads\\5ba9bd91-b89c-40c2-bb8a-66703408f986.png",
-//           price: faker.commerce.price({ min: 1500, max: 80000, dec: 0 }),
-//           stock: faker.commerce.price({ min: 0, max: 100, dec: 0 }),
-//           category: faker.commerce.department(),
-//           createdAt: new Date(faker.date.past()),
-//           updatedAt: new Date(faker.date.recent()),
-//           __v: 0,
-//         };
-    
-//         products.push(product);
-//       }
-    
-//       await Product.create(products);
-    
-//       console.log({ succecss: true });
-//     };
-
-
-// const deleteRandomsProducts = async (count: number = 10) => {
-//   const products = await Product.find({}).skip(2);
-
-//   for (let i = 0; i < products.length; i++) {
-//     const product = products[i];
-//     await product.deleteOne();
-//   }
-
-//   console.log({ succecss: true });
-// };
